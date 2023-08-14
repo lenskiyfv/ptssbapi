@@ -1,7 +1,7 @@
 import requests
 import urllib3
 
-from . import exceptions
+import exceptions
 
 
 class Client:
@@ -27,7 +27,7 @@ class Client:
             self._disable_insecure_request_warning()
         self.verify = verify
 
-    def send_request(
+    def _send_request(
         self, relative_url: str, headers: dict, json: dict = None, data: bytes = None
     ) -> dict:
         url = self.root_url + relative_url
@@ -66,14 +66,14 @@ class Client:
 
     def check_health(self) -> dict:
         relative_url = "/maintenance/checkHealth"
-        return self.send_request(relative_url=relative_url, headers=self.headers)
+        return self._send_request(relative_url=relative_url, headers=self.headers)
 
     def upload_scan_file(self, file_path: str) -> dict:
         relative_url = "/storage/uploadScanFile"
         headers = self.headers
         headers["content-type"] = "application/octet-stream"
         data = self._get_binary_file(file_path=file_path)
-        return self.send_request(relative_url=relative_url, headers=headers, data=data)
+        return self._send_request(relative_url=relative_url, headers=headers, data=data)
 
     def create_scan_task(
         self, file_uri: str, file_name: str, passwords_for_unpack: list = []
@@ -95,27 +95,27 @@ class Client:
                 },
             },
         }
-        return self.send_request(
+        return self._send_request(
             relative_url=relative_url, headers=self.headers, json=json
         )
 
     def check_scan_task(self, scan_id: str) -> dict:
         relative_url = "/analysis/checkTask"
         json = {"scan_id": scan_id}
-        return self.send_request(
+        return self._send_request(
             relative_url=relative_url, headers=self.headers, json=json
         )
 
     def check_scan_report(self, scan_id: str) -> dict:
         relative_url = "/analysis/report"
         json = {"scan_id": scan_id}
-        return self.send_request(
+        return self._send_request(
             relative_url=relative_url, headers=self.headers, json=json
         )
 
     def get_images(self) -> dict:
         relative_url = "/engines/sandbox/getImages"
-        return self.send_request(relative_url=relative_url, headers=self.headers)
+        return self._send_request(relative_url=relative_url, headers=self.headers)
 
     @staticmethod
     def _get_binary_file(file_path: str) -> bytes:
